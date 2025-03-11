@@ -24,7 +24,7 @@ class InstituicaoService {
                         tipo: 'J',
                         pessoaJuridica: {
                             create: {
-                                nome_fantasia: data.nome || ""
+                                nome_fantasia: data.nome
                             }
                         }
                     }
