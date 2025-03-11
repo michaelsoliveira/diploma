@@ -1,14 +1,9 @@
-import { Prisma, Umf } from "@prisma/client";
+import { Estado, Prisma } from "@prisma/client";
 import { prismaClient } from "../database/prismaClient";
-
-export interface UmfType {
-    nome: string;
-    uf: string;
-    ddd?: number;
-}
+import { EstadoType } from "../@types";
 
 class EstadoService {
-    async create(data: UmfType): Promise<any> {
+    async create(data: EstadoType): Promise<any> {
         
         const estadoExists = await prismaClient.estado.findFirst({
             where: {
@@ -36,7 +31,7 @@ class EstadoService {
         return estado
     }
 
-    async update(id: string, data: UmfType): Promise<Umf> {
+    async update(id: string, data: EstadoType): Promise<Estado> {
         await prismaClient.estado.update({
             where: {
                 id

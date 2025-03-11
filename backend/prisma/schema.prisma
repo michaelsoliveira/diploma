@@ -1,19 +1,21 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  extensions = [uuidOssp(map: "uuid-ossp")]
 }
 
 model Pessoa {
   id                    String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  created_at            DateTime        @default(now()) @db.Timestamp(6)
-  updated_at            DateTime        @default(now()) @db.Timestamp(6)
   tipo                  TipoPessoa      @default(F)
   id_endereco           String?         @db.Uuid
   id_telefone           String?         @db.Uuid
+  instituicao           Instituicao?
+  aluno                 Aluno?
   endereco              Endereco?       @relation(fields: [id_endereco], references: [id], onDelete: Cascade, onUpdate: Cascade)
   telefone              Telefone?       @relation(fields: [id_telefone], references: [id], onDelete: Cascade, onUpdate: NoAction)
   pessoaFisica          PessoaFisica?
@@ -21,14 +23,57 @@ model Pessoa {
   @@map("pessoa")
 }
 
+model Curso {
+    id                    String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+    created_at            DateTime        @default(now()) @db.Timestamp(6)
+    updated_at            DateTime        @default(now()) @db.Timestamp(6)
+    nome                  String?
+    codigo_emec           Int?
+    aluno                 Aluno?
+    registro_diploma      RegistroDiploma?
+    @@map("curso")
+}
+
+model Aluno {
+    id                    String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+    created_at            DateTime        @default(now()) @db.Timestamp(6)
+    updated_at            DateTime        @default(now()) @db.Timestamp(6)
+    id_pessoa             String?         @unique @db.Uuid
+    pessoa                Pessoa?         @relation(fields: [id_pessoa], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    id_curso              String?         @unique @db.Uuid
+    curso                 Curso?          @relation(fields: [id_curso], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    registro_diploma      RegistroDiploma?
+    @@map("aluno")
+}
+
+model RegistroDiploma {
+    id                    String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+    created_at            DateTime        @default(now()) @db.Timestamp(6)
+    updated_at            DateTime        @default(now()) @db.Timestamp(6)
+    id_aluno              String          @unique @db.Uuid
+    aluno                 Aluno           @relation(fields: [id_aluno], references: [id])
+    id_curso              String          @unique @db.Uuid
+    curso                 Curso           @relation(fields: [id_curso], references: [id])
+    id_ies_exp            String          @unique @db.Uuid
+    ies_expedidora        Instituicao     @relation("ies_expedidora", fields: [id_ies_exp], references: [id])
+    id_ies_reg            String          @unique @db.Uuid
+    ies_registradora      Instituicao     @relation("ies_registradora", fields: [id_ies_reg], references: [id])
+    data_ingresso         DateTime        @db.Date
+    data_conclusao        DateTime        @db.Date
+    data_expedicao        DateTime        @db.Date
+    data_registro         DateTime        @db.Date
+    numero_expedicao      Int
+    numero_registro       Int
+    numero_processo       String?
+    @@map("registro_diploma")
+}
+
 model PessoaFisica {
   id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  created_at      DateTime  @default(now()) @db.Timestamp(6)
-  updated_at      DateTime  @default(now()) @db.Timestamp(6)
   nome            String?
   rg              String?   @db.VarChar(30)
   cpf             String?   @db.VarChar(14)
-  data_nascimento DateTime?
+  data_nascimento DateTime? @db.Date
   id_pessoa       String?   @unique @db.Uuid
   pessoa          Pessoa?  @relation(fields: [id_pessoa], references: [id], onDelete: Cascade, onUpdate: Cascade)
   discente        Discente?
@@ -37,10 +82,8 @@ model PessoaFisica {
 
 model PessoaJuridica {
   id                 String    @id(map: "PK_bee78e8f1760ccf9cff402118a6") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  created_at         DateTime  @default(now()) @db.Timestamp(6)
-  updated_at         DateTime  @default(now()) @db.Timestamp(6)
   nome_fantasia      String    @db.VarChar(100)
-  razao_social       String    @db.VarChar(100)
+  razao_social       String?    @db.VarChar(100)
   inscricao_estadual String?   @db.VarChar(30)
   inscricao_federal  String?   @db.VarChar(30)
   cnpj               String?   @db.VarChar(14)
@@ -48,7 +91,6 @@ model PessoaJuridica {
 
   id_pessoa          String?   @unique @db.Uuid
   pessoa             Pessoa?  @relation(fields: [id_pessoa], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  instituicao        Instituicao?
   @@map("pessoa_juridica")
 }
 
@@ -57,7 +99,9 @@ model Instituicao {
   nome        String
   codigo_emec String?
   id_pessoa   String? @unique @db.Uuid
-  pessoa_juridica   PessoaJuridica? @relation(fields: [id_pessoa], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  pessoa     Pessoa? @relation(fields: [id_pessoa], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ies_expedidoras    RegistroDiploma[] @relation("ies_expedidora")
+  ies_registradoras  RegistroDiploma[] @relation("ies_registradora")
   @@map("instituicao")
 }
 
@@ -67,12 +111,6 @@ model Discente {
   id_pessoa   String? @unique @db.Uuid
   pessoa      PessoaFisica? @relation(fields: [id_pessoa], references: [id])
   @@map("discente")
-}
-
-model RegistroDiploma {
-  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-
-  @@map("registro_diploma")
 }
 
 model Telefone {

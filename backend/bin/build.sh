@@ -10,8 +10,8 @@ docker builder prune
 
 echo -e '\n'
 
-docker network create $IO_PROJECT'_'$IO_APP'_'$IO_STAGE
+docker network create $APP_NAME'_network'
 docker volume create $POSTGRES_VOL
 docker volume create $PGADMIN_VOL
 
-docker volume create --driver local --opt type=none --opt device=$(pwd)/backup --opt o=bind $IO_PROJECT'_'$IO_APP'_'$IO_STAGE'_backup'
+docker volume create --driver local --opt type=none --opt device=$(pwd)/backup --opt o=bind $APP_NAME'_backup'

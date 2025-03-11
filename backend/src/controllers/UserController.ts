@@ -214,7 +214,7 @@ export class UserController {
 
     async findAll(request: Request, response: Response) {
         try {
-            let users = await userService.getAllByProjeto(request.user?.id)
+            let users = await userService.getAll()
 
             return response.json(users)
         } catch(error: any) {
@@ -228,9 +228,9 @@ export class UserController {
     }
 
     async findOne(request: Request, response: Response) {
-        const { userId, projetoId } = request.params
+        const { userId } = request.params
         try {
-            let users = await userService.findOne(userId, projetoId)
+            let users = await userService.findOne(userId)
 
             return response.json(users)
         } catch(error: any) {

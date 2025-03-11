@@ -23,12 +23,6 @@ class AuthService {
         
         const user = await prismaClient.user.findUnique({
             include: {
-                projeto: true,
-                poa_ativo: {
-                    include: {
-                        situacao_poa: true
-                    }
-                },
                 users_roles: {
                     include: {
                         roles: {
@@ -75,9 +69,7 @@ class AuthService {
                 username: user.username,
                 email: user.email,
                 image: user.image,
-                projeto_ativo: user.projeto,
-                poa_ativo: user.poa_ativo,
-                roles: user.users_roles?.map((role: any) => {return {projeto: role.id_projeto, roles: role.roles}}),
+                roles: user.users_roles?.map((role: any) => {return {roles: role.roles}}),
                 access_token: token,
                 expires_in: config.server.jwtExpiration,
                 refresh_token

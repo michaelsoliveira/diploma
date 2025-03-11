@@ -1,12 +1,12 @@
+-- CreateExtension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- CreateEnum
 CREATE TYPE "TipoPessoa" AS ENUM ('F', 'J');
 
 -- CreateTable
 CREATE TABLE "pessoa" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "tipo" "TipoPessoa" NOT NULL DEFAULT 'F',
     "id_endereco" UUID,
     "id_telefone" UUID,
@@ -15,14 +15,54 @@ CREATE TABLE "pessoa" (
 );
 
 -- CreateTable
-CREATE TABLE "pessoa_fisica" (
+CREATE TABLE "curso" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "nome" TEXT,
+    "codigo_emec" INTEGER,
+
+    CONSTRAINT "curso_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "aluno" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id_pessoa" UUID,
+    "id_curso" UUID,
+
+    CONSTRAINT "aluno_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "registro_diploma" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id_aluno" UUID NOT NULL,
+    "id_curso" UUID NOT NULL,
+    "id_ies_exp" UUID NOT NULL,
+    "id_ies_reg" UUID NOT NULL,
+    "data_ingresso" DATE NOT NULL,
+    "data_conclusao" DATE NOT NULL,
+    "data_expedicao" DATE NOT NULL,
+    "data_registro" DATE NOT NULL,
+    "numero_expedicao" INTEGER NOT NULL,
+    "numero_registro" INTEGER NOT NULL,
+    "numero_processo" TEXT,
+
+    CONSTRAINT "registro_diploma_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "pessoa_fisica" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "nome" TEXT,
     "rg" VARCHAR(30),
     "cpf" VARCHAR(14),
-    "data_nascimento" TIMESTAMP(3),
+    "data_nascimento" DATE,
     "id_pessoa" UUID,
 
     CONSTRAINT "pessoa_fisica_pkey" PRIMARY KEY ("id")
@@ -31,10 +71,8 @@ CREATE TABLE "pessoa_fisica" (
 -- CreateTable
 CREATE TABLE "pessoa_juridica" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
-    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "nome_fantasia" VARCHAR(100) NOT NULL,
-    "razao_social" VARCHAR(100) NOT NULL,
+    "razao_social" VARCHAR(100),
     "inscricao_estadual" VARCHAR(30),
     "inscricao_federal" VARCHAR(30),
     "cnpj" VARCHAR(14),
@@ -42,6 +80,25 @@ CREATE TABLE "pessoa_juridica" (
     "id_pessoa" UUID,
 
     CONSTRAINT "PK_bee78e8f1760ccf9cff402118a6" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "instituicao" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "nome" TEXT NOT NULL,
+    "codigo_emec" TEXT,
+    "id_pessoa" UUID,
+
+    CONSTRAINT "instituicao_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "discente" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "matricula" TEXT,
+    "id_pessoa" UUID,
+
+    CONSTRAINT "discente_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -189,10 +246,34 @@ CREATE TABLE "estado" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "aluno_id_pessoa_key" ON "aluno"("id_pessoa");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "aluno_id_curso_key" ON "aluno"("id_curso");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "registro_diploma_id_aluno_key" ON "registro_diploma"("id_aluno");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "registro_diploma_id_curso_key" ON "registro_diploma"("id_curso");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "registro_diploma_id_ies_exp_key" ON "registro_diploma"("id_ies_exp");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "registro_diploma_id_ies_reg_key" ON "registro_diploma"("id_ies_reg");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "pessoa_fisica_id_pessoa_key" ON "pessoa_fisica"("id_pessoa");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "pessoa_juridica_id_pessoa_key" ON "pessoa_juridica"("id_pessoa");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "instituicao_id_pessoa_key" ON "instituicao"("id_pessoa");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "discente_id_pessoa_key" ON "discente"("id_pessoa");
 
 -- CreateIndex
 CREATE INDEX "IDX_3309f5fa8d95935f0701027f2b" ON "permissions_roles"("permission_id");
@@ -234,10 +315,34 @@ ALTER TABLE "pessoa" ADD CONSTRAINT "pessoa_id_endereco_fkey" FOREIGN KEY ("id_e
 ALTER TABLE "pessoa" ADD CONSTRAINT "pessoa_id_telefone_fkey" FOREIGN KEY ("id_telefone") REFERENCES "telefone"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE "aluno" ADD CONSTRAINT "aluno_id_pessoa_fkey" FOREIGN KEY ("id_pessoa") REFERENCES "pessoa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "aluno" ADD CONSTRAINT "aluno_id_curso_fkey" FOREIGN KEY ("id_curso") REFERENCES "curso"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "registro_diploma" ADD CONSTRAINT "registro_diploma_id_aluno_fkey" FOREIGN KEY ("id_aluno") REFERENCES "aluno"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "registro_diploma" ADD CONSTRAINT "registro_diploma_id_curso_fkey" FOREIGN KEY ("id_curso") REFERENCES "curso"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "registro_diploma" ADD CONSTRAINT "registro_diploma_id_ies_exp_fkey" FOREIGN KEY ("id_ies_exp") REFERENCES "instituicao"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "registro_diploma" ADD CONSTRAINT "registro_diploma_id_ies_reg_fkey" FOREIGN KEY ("id_ies_reg") REFERENCES "instituicao"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "pessoa_fisica" ADD CONSTRAINT "pessoa_fisica_id_pessoa_fkey" FOREIGN KEY ("id_pessoa") REFERENCES "pessoa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "pessoa_juridica" ADD CONSTRAINT "pessoa_juridica_id_pessoa_fkey" FOREIGN KEY ("id_pessoa") REFERENCES "pessoa"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "instituicao" ADD CONSTRAINT "instituicao_id_pessoa_fkey" FOREIGN KEY ("id_pessoa") REFERENCES "pessoa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "discente" ADD CONSTRAINT "discente_id_pessoa_fkey" FOREIGN KEY ("id_pessoa") REFERENCES "pessoa_fisica"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "endereco" ADD CONSTRAINT "endereco_id_estado_fkey" FOREIGN KEY ("id_estado") REFERENCES "estado"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
