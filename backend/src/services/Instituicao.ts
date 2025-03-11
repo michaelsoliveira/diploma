@@ -1,8 +1,8 @@
-import { Curso, Prisma } from "@prisma/client";
+import { Curso, Instituicao, Prisma } from "@prisma/client";
 import { prismaClient } from "../database/prismaClient";
 
 class InstituicaoService {
-    async create(data: any): Promise<InstituicaoService> {
+    async create(data: any): Promise<Instituicao> {
         const instituicaoExists = await prismaClient.instituicao.findFirst({
             where: {
                 pessoa: {
@@ -19,6 +19,8 @@ class InstituicaoService {
 
         const instituicao = await prismaClient.instituicao.create({
             data: {
+                nome: data.nome,
+                codigo_emec: data.codigo_emec,
                 pessoa: {
                     create: {
                         tipo: 'J',
