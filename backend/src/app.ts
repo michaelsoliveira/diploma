@@ -1,5 +1,3 @@
-require('dotenv').config({ path: `${__dirname}/../.env.io` })
-import { Request, Response, NextFunction } from "express"
 const express = require('express');
 import routes from "./routes"
 import cors from 'cors'
@@ -10,15 +8,13 @@ const cookieParser = require('cookie-parser')
 
 import { errorMiddleware } from "./middleware/error"
 
-console.log('Version: ' + process.env.IO_VERSION)
-console.log('Stage: ' + process.env.IO_STAGE)
+console.log('Version: ' + process.env.VERSION)
 
 var whitelist = [
   "http://localhost:3000", 
   "http://localhost:8501",
   "https://consultaregistro.unifap.br", 
   "https://consultaregistro.unifap.br/backend", 
-  "https://consultaregistro.unifap.br/kc", 
   "https://consultaregistro.unifap.br/ml"
 ]
 var corsOptions = {

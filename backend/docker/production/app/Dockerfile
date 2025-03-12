@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN set -ex \
- && apk add --update --no-cache bash curl \
+ && apk add --update --no-cache bash curl openssl \
  && npm install -g nodemon \
  && npm install --no-optional \
  && npm cache clean --force \
