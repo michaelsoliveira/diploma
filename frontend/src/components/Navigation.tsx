@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
-/* This example requires Tailwind CSS v2.0+ */
+'use client'
+
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Disclosure, Menu, Transition, Popover } from '@headlessui/react'
 import Link from 'next/link'
@@ -14,13 +14,12 @@ import {
 } from '@heroicons/react/24/outline'
 import { cn } from '@/utils/cn'
 import Logo from './Logo'
-import { useRouter } from 'next/router'
-import { redirect } from 'next/navigation'
+import { redirect, usePathname  } from 'next/navigation'
 import { NavigationType, SubMenuType } from '@/types'
 
 export default function Navigation({ defaultNavigation, userNavigation }: any) {
     const session = false
-    const router = useRouter()
+    const pathname = usePathname()
 
     const [navigation, setNavigation] = useState<NavigationType[]>(defaultNavigation)
     const [sticky, setSticky] = useState(false)
@@ -67,16 +66,16 @@ export default function Navigation({ defaultNavigation, userNavigation }: any) {
             
             defaultNavigation?.map((nav: NavigationType, indexParent: number) => {
                 if (nav?.subMenuItems) {
-                    if (router.pathname === nav.href) {
+                    if (pathname === nav.href) {
                         return changeCurrentParent(indexParent)
                     }
                     nav?.subMenuItems?.map((subMenu: SubMenuType) => {
-                        if (router.pathname === subMenu.href) {
+                        if (pathname === subMenu.href) {
                             return changeCurrentParent(indexParent)
                         }
 
                         subMenu.subMenuItems?.map((subsubMenu: SubMenuType) => {
-                            if (router.pathname === subsubMenu.href) {
+                            if (pathname === subsubMenu.href) {
                                 return changeCurrentParent(indexParent)
                             }
                         })
@@ -84,7 +83,7 @@ export default function Navigation({ defaultNavigation, userNavigation }: any) {
                 }
             })
         
-    }, [changeCurrentParent, defaultNavigation, router.pathname])
+    }, [changeCurrentParent, defaultNavigation, pathname])
 
     const loadNavigation = useCallback(async() => {
         if (true) {
@@ -208,7 +207,7 @@ export default function Navigation({ defaultNavigation, userNavigation }: any) {
                                                     href={subMenu?.href || "#"}
                                                     className={cn(
                                                     
-                                                        router.pathname === subMenu?.href && 'bg-gray-100',
+                                                        pathname === subMenu?.href && 'bg-gray-100',
                                                         'group flex rounded-md text-start items-center w-full px-2 py-2 text-sm transition duration-500 ease-in-out hover:bg-gray-100'
                                                     )}
                                                 >
@@ -271,7 +270,7 @@ export default function Navigation({ defaultNavigation, userNavigation }: any) {
                                                                     onClick={close}
                                                                     className={cn(
                                                                         !subsubMenu?.icon && 'pl-8' ,
-                                                                        router.pathname === subsubMenu?.href && 'bg-gray-100',
+                                                                        pathname === subsubMenu?.href && 'bg-gray-100',
                                                                         'group flex rounded-md text-start items-center w-full px-2 py-2 text-sm transition duration-500 ease-in-out hover:bg-gray-100'
                                                                     )}
                                                                 >
@@ -402,7 +401,7 @@ export default function Navigation({ defaultNavigation, userNavigation }: any) {
 
             <Disclosure.Panel className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                {navigation.map((item, key) => (
+                {navigation?.map((item, key) => (
                 item.visible &&
                 (!item.subMenu ?    
                 (<Disclosure.Button
