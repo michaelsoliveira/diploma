@@ -1,4 +1,4 @@
-##Sistema de Consulta Registro de Diploma da UNIFAP
+Sistema de Consulta Registro de Diploma da UNIFAP
 
 
 O sistema foi implementado utilizando as seguintes tecnologias:
