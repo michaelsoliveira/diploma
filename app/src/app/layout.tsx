@@ -3,7 +3,7 @@ import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
-import { Lato, Nunito } from 'next/font/google';
+import { Nunito } from 'next/font/google';
 import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 
