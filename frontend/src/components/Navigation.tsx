@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 'use client'
 
 import { Fragment, useCallback, useEffect, useState } from 'react'
